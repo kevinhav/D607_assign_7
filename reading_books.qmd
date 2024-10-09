@@ -1,0 +1,56 @@
+---
+title: "Reading Books"
+format: html
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(rjson)
+library(XML)
+library(xml2)
+library(rvest)
+```
+
+
+```{r}
+dune <- fromJSON(paste(readLines("dune.json"), collapse=""))
+```
+
+```{r}
+hobbit_xml <- read_xml("hobbit.xml")
+hobbit <- xmlParse(hobbit_xml)
+
+h_title <- xml_text(xml_find_all(hobbit_xml, "//title"))
+h_author <- xml_text(xml_find_all(hobbit_xml, "//author"))
+h_genre <- xml_text(xml_find_all(hobbit_xml, "//genre"))
+
+hobbit_df <- tibble(h_title, h_author, h_genre)
+
+```
+
+```{r}
+html <- read_html("khaneman.html")
+
+title <- html_element(html, "div") %>% html_attr("title")
+author <- html_element(html, "div") %>% html_attr("author")
+publisher <- html_element(html, "div") %>% html_attr("publisher")
+edition <- html_element(html, "div") %>% html_attr("edition")
+publishing_date <- html_element(html, "div") %>% html_attr("publishing_date")
+isbn <- html_element(html, "div") %>% html_attr("ISBN")
+
+khaneman <- tibble(
+  Title = title,
+  Author = author,
+  Publisher = publisher,
+  Edition = edition,
+  Publishing_Date = publishing_date,
+  ISBN = isbn,
+  stringsAsFactors = FALSE
+)
+```
+

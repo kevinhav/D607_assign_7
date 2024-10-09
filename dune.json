@@ -1,0 +1,12 @@
+{
+  "book": {
+    "title": "Dune",
+    "author": "Herbert, Frank",
+    "genre": "Science Fiction",
+    "characters" : [
+      {"firstname":"Paul", "lastname":"Atreides"},
+      {"firstname":"Vladmir", "lastname":"Harkonnen"},
+      {"firstname":"Chani"}
+      ]
+  }
+}
