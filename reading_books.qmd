@@ -29,7 +29,7 @@ We'll review a JSON, HTML, and XML file, each containing data on a different boo
 Reading from JSON is relatively straightforward using the `jsonlite` library, however it comes in the form of a list of lists. We can turn it into a tibble by unnesting each set of lists into its own set of columns
 
 ```{r}
-dune_list <- jsonlite::fromJSON("dune.json", flatten = TRUE)
+dune_list <- jsonlite::fromJSON("https://raw.githubusercontent.com/kevinhav/D607_assign_7/refs/heads/main/dune.json", flatten = TRUE)
 
 dune_tibble <- tibble(book = list(dune_list$book))
 
@@ -47,7 +47,7 @@ Reading XML is straightforward using `read_xml`, however we'll need to individua
 
 ```{r}
 # Read in the raw XML
-hobbit_xml <- read_xml("hobbit.xml")
+hobbit_xml <- read_xml("https://raw.githubusercontent.com/kevinhav/D607_assign_7/refs/heads/main/hobbit.xml")
 
 # Parse the XML so we can work with it further
 hobbit <- xmlParse(hobbit_xml)
@@ -70,7 +70,7 @@ kable(hobbit_df)
 HTML is the least straightforward (most unstructured?) data format. Similar to XML, we must extract each "column" from each HTML attribute as individual objects, then combine them into a full tibble.
 
 ```{r}
-html <- read_html("khaneman.html")
+html <- read_html("https://raw.githubusercontent.com/kevinhav/D607_assign_7/refs/heads/main/khaneman.html")
 
 title <- html_element(html, "div") %>% html_attr("title")
 author <- html_element(html, "div") %>% html_attr("author")
