@@ -8,30 +8,66 @@ format: html
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
+```{r, output = FALSE}
 library(tidyverse)
 library(rjson)
 library(XML)
 library(xml2)
 library(rvest)
+library(jsonlite)
+library(knitr)
 ```
 
+# Introduction
+
+In this notebook we will introduce reading less-than-tidy data commonly found on the web, and demonstrate the steps needed to get each format into proper tidy shape.
+
+We'll review a JSON, HTML, and XML file, each containing data on a different book. 
+
+## JSON
+
+Reading from JSON is relatively straightforward using the `jsonlite` library, however it comes in the form of a list of lists. We can turn it into a tibble by unnesting each set of lists into its own set of columns
 
 ```{r}
-dune <- fromJSON(paste(readLines("dune.json"), collapse=""))
+dune_list <- jsonlite::fromJSON("dune.json", flatten = TRUE)
+
+dune_tibble <- tibble(book = list(dune_list$book))
+
+dune_tibble_flat <- dune_tibble |> 
+  unnest_wider(book) |> 
+  unnest_longer(characters) |> 
+  unnest_wider(characters)
+
+kable(dune_tibble_flat)
 ```
 
+## XML
+
+Reading XML is straightforward using `read_xml`, however we'll need to individually parse each section as its own column in order to create a tidy dataframe.
+
 ```{r}
+# Read in the raw XML
 hobbit_xml <- read_xml("hobbit.xml")
+
+# Parse the XML so we can work with it further
 hobbit <- xmlParse(hobbit_xml)
 
-h_title <- xml_text(xml_find_all(hobbit_xml, "//title"))
-h_author <- xml_text(xml_find_all(hobbit_xml, "//author"))
-h_genre <- xml_text(xml_find_all(hobbit_xml, "//genre"))
+# Extract each section into new objects
+title <- xml_text(xml_find_all(hobbit_xml, "//title"))
+author <- xml_text(xml_find_all(hobbit_xml, "//author"))
+genre <- xml_text(xml_find_all(hobbit_xml, "//genre"))
 
-hobbit_df <- tibble(h_title, h_author, h_genre)
+# Assemble the column objects into a tibble
+hobbit_df <- tibble(title, author, genre)
+
+kable(hobbit_df)
 
 ```
+
+
+## HTML
+
+HTML is the least straightforward (most unstructured?) data format. Similar to XML, we must extract each "column" from each HTML attribute as individual objects, then combine them into a full tibble.
 
 ```{r}
 html <- read_html("khaneman.html")
@@ -41,7 +77,7 @@ author <- html_element(html, "div") %>% html_attr("author")
 publisher <- html_element(html, "div") %>% html_attr("publisher")
 edition <- html_element(html, "div") %>% html_attr("edition")
 publishing_date <- html_element(html, "div") %>% html_attr("publishing_date")
-isbn <- html_element(html, "div") %>% html_attr("ISBN")
+isbn <- html_element(html, "div") %>% html_attr("isbn")
 
 khaneman <- tibble(
   Title = title,
@@ -49,8 +85,9 @@ khaneman <- tibble(
   Publisher = publisher,
   Edition = edition,
   Publishing_Date = publishing_date,
-  ISBN = isbn,
-  stringsAsFactors = FALSE
+  ISBN = isbn
 )
+
+kable(khaneman)
 ```
 
